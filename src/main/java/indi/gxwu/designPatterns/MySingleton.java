@@ -1,4 +1,4 @@
-package indi.gxwu.designModel;
+package indi.gxwu.designPatterns;
 
 /**
  * @Author: gx.wu
