@@ -13,7 +13,8 @@ public class PermuteTest {
     public static void main(String[] args) {
         PermuteTest t = new PermuteTest();
         int[] nums = {1,2,3,4};
-        List<List<Integer>> result = t.permute(nums);
+//        List<List<Integer>> result = t.permute(nums);
+        List<List<Integer>> result = t.permute2(nums);
         System.out.println(result.size());
         for(List<Integer> v : result){
             System.out.println(v);
@@ -67,6 +68,29 @@ public class PermuteTest {
     }
 
 
+    public List<List<Integer>> permute2(final int[] nums) {
+        List<List<Integer>> result = new ArrayList<List<Integer>>();
+        if(nums.length==0){
+            result.add(new ArrayList<Integer>());
+            return result;
+        }
+        List<Integer> tempRs = new ArrayList<Integer>();
+        handle(result, tempRs, nums, 0);
+        return result;
+    }
+
+    public void handle(List<List<Integer>> result, List<Integer> tempRs, final int[] nums, int index){
+        if(index>= nums.length){
+            result.add(new ArrayList<Integer>(tempRs));
+            return;
+        }
+        int collVal = nums[index];
+        for(int i=0;i<=index;i++){
+            tempRs.add(i, collVal);
+            handle(result, tempRs, nums, index+1);
+            tempRs.remove(i);
+        }
+    }
 
 
 
@@ -74,4 +98,6 @@ public class PermuteTest {
 
 
 
-}
+
+
+    }

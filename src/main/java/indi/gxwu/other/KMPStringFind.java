@@ -3,7 +3,7 @@ package indi.gxwu.other;
 /**
  * @Author: gx.wu
  * @Date: 2019/12/19 10:19
- * @Description: code something to describe this module what it is
+ * @Description: kmp字符匹配
  */
 public class KMPStringFind {
 
