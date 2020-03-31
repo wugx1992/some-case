@@ -36,6 +36,7 @@ public class LeastIntervalTest {
         System.out.println(taskStr);
         System.out.println(t.leastInterval(taskStr.toCharArray(), n));
         System.out.println(t.leastInterval2(taskStr.toCharArray(), n));
+        System.out.println(t.leastInterval2(taskStr.toCharArray(), 5));
 
     }
 
