@@ -88,7 +88,8 @@ public class ReentrantLockTest {
         public void run(){
             try{
                 lock.lock();
-                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+" the lock is fair: "+((ReentrantLock)lock).isFair());
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()
+                        +" the lock is fair: "+((ReentrantLock)lock).isFair()+" queueLength: "+((ReentrantLock)lock).getQueueLength());
                 TimeUnit.MILLISECONDS.sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -51,11 +51,12 @@ public class ReentrantLockConditionTest {
             try {
                 long wait = new Random().nextInt()%100;
                 wait = wait<0?-wait:wait;
-                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+" increase after sleep: "+ wait);
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+" increase after sleep: "+ wait
+                        +" queueLength: "+lock.getQueueLength()+" waitQueueLength: "+ lock.getWaitQueueLength(condition));
                 TimeUnit.MILLISECONDS.sleep(wait);
                 number++;
                 condition.signalAll();
-                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+" signal all");
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+" signal all"+" waitQueueLength: "+lock.getWaitQueueLength(condition));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } finally {
