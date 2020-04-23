@@ -26,10 +26,10 @@ public class SemaphoreTest {
                 System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+" 成功获取信号量！随机睡眠...");
                 TimeUnit.MILLISECONDS.sleep(new Random().nextInt(3000));
                 System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+" 准备释放信号量...");
-                semaphore.release(2);
-
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }finally {
+                semaphore.release(2);
             }
         }
     }
