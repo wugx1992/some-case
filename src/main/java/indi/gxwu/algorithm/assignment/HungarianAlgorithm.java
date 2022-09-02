@@ -1,4 +1,4 @@
-package indi.gxwu.algorithm.hungary.demo1;
+package indi.gxwu.algorithm.assignment;
 
 import lombok.Data;
 
@@ -9,18 +9,19 @@ import java.util.List;
  * @author: gx.wu
  * @date: 2022/8/29
  * @description:
+ * https://brc2.com/the-algorithm-workshop/
  **/
-public class Hungary {
+public class HungarianAlgorithm {
 
-    private static int nRow;
-    private static int nCol;
-    private static int[][] costs;
-    private static int[][] costsBackup;
-    private static int[][] masks;
-    private static int[] rowCover;
-    private static int[] colCover;
-    private static int pathRow0, pathCol0, pathCount;
-    private static List<MatrixItem> paths = new ArrayList<>();
+    private int nRow;
+    private int nCol;
+    private int[][] costs;
+    private int[][] costsBackup;
+    private int[][] masks;
+    private int[] rowCover;
+    private int[] colCover;
+    private int pathRow0, pathCol0, pathCount;
+    private List<MatrixItem> paths = new ArrayList<>();
 
     private static final int STEP_ONE = 1;
     private static final int STEP_TWO = 2;
@@ -41,12 +42,37 @@ public class Hungary {
         private int col;
     }
 
-    static {
+    /**
+     * 初始化
+     */
+    private void init() {
+        nRow = costs.length;
+        nCol = costs[0].length;
+        masks = new int[nRow][nCol];
+        costsBackup = new int[nRow][nCol];
+        rowCover = new int[nRow];
+        colCover = new int[nCol];
+        pathCount = 1;
+        for(int r = 0; r < nRow; r++) {
+            for(int c = 0; c < nCol; c++) {
+                costsBackup[r][c] = costs[r][c];
+            }
+        }
+    }
+
+    /**
+     * 输入矩阵
+     * @param costs
+     */
+    public void inputCostMatrix(int[][] costs){
+        this.costs = costs;
         init();
     }
 
-    private static void init() {
-        costs = new int[][]{
+
+
+    public static void main(String[] args) {
+        int[][] costs = new int[][]{
 //                {1, 2, 3},
 //                {2, 4, 6},
 //                {3, 6, 9},
@@ -62,32 +88,20 @@ public class Hungary {
 //                {11, 23, 14, 21, 10},
 //                {11, 23, 14, 21, 10},
 
-                {10, 10, 10, 10},
-                {10, 10, 10, 10},
-                {10, 10, 10, 10},
-                {11, 10, 10, 11},
+                {3, 5, 5, 4},
+                {2, 2, 0, 2},
+                {2, 4, 4, 0},
+                {0, 1, 0, 0},
+
 
         };
-        nRow = costs.length;
-        nCol = costs[0].length;
-        masks = new int[nRow][nCol];
-        costsBackup = new int[nRow][nCol];
-        rowCover = new int[nRow];
-        colCover = new int[nCol];
-        pathCount = 1;
-        for(int r = 0; r < nRow; r++) {
-            for(int c = 0; c < nCol; c++) {
-                costsBackup[r][c] = costs[r][c];
-            }
-        }
-
+        HungarianAlgorithm hungarian = new HungarianAlgorithm();
+        hungarian.runMunkres(costs);
     }
 
-    public static void main(String[] args) {
-        runMunkres();
-    }
+    private void runMunkres(int[][] costs){
+        inputCostMatrix(costs);
 
-    private static void runMunkres(){
         boolean done = false;
         int step = 1;
         printCostMatrix();
@@ -131,7 +145,7 @@ public class Hungary {
      * 遍历矩阵中的每一行，找出当前行最小值，并将当前行所有元素减去最小值，之后跳转步骤 2
      * @return
      */
-    private static int stepOne(){
+    private int stepOne(){
         int minInRow, minC;
         for(int r = 0; r < nRow; r++) {
             minInRow = costs[r][0];
@@ -158,7 +172,7 @@ public class Hungary {
      * 遍历矩阵，若元素为 0，且该元素所在行、列均未被标记，则标记该元素为星0，且所在行、列为已标记。遍历完矩阵之后，重置行、列标记。
      * @return
      */
-    private static int stepTwo(){
+    private int stepTwo(){
         for(int r = 0; r < nRow; r++) {
             for(int c = 0; c < nCol; c++) {
                 //元素为0，且所在行、列均未被覆盖，元素标记为星0，行、列标记为已覆盖
@@ -188,7 +202,7 @@ public class Hungary {
      * 否则跳转步骤4
      * @return
      */
-    private static int stepThree(){
+    private int stepThree(){
         for(int r = 0; r < nRow; r++) {
             for(int c = 0; c < nCol; c++) {
                 //元素为星0，标记所在列为已覆盖
@@ -220,7 +234,7 @@ public class Hungary {
      * 遍历矩阵，将未覆盖的0，标记为划线0。找出该0元素所在行没有星0元素的坐标
      * @return
      */
-    private static int stepFour(){
+    private int stepFour(){
         int row = -1, col = -1;
         boolean done = false;
         int step = -1;
@@ -273,7 +287,7 @@ public class Hungary {
      * 掩码矩阵中所有划线0重置为无标记。
      * @return
      */
-    private static int stepFive(){
+    private int stepFive(){
         boolean done = false;
         int r = -1, c = -1;
         pathCount = 1;
@@ -310,7 +324,7 @@ public class Hungary {
      * 跳转步骤4
      * @return
      */
-    private static int stepSix(){
+    private int stepSix(){
         int minVal = findSmallest();
         System.out.println("未覆盖元素中，最小值：" + minVal);
         for(int r = 0; r < nRow; r++) {
@@ -330,7 +344,7 @@ public class Hungary {
      *
      * @return
      */
-    private static void finishPrint(){
+    private void finishPrint(){
         System.out.println("----------- DONE -----------------");
         for(int r = 0; r < nRow; r++){
             for(int c = 0; c < nCol; c++) {
@@ -339,47 +353,47 @@ public class Hungary {
                     result = "*";
                 }
                 result += costsBackup[r][c];
-                System.out.print(String.format("%1$5s", result));
+                System.out.print(String.format("%1$6s", result));
             }
             System.out.print("\n");
         }
         printPath();
     }
 
-    private static void printCostMatrix(){
+    private void printCostMatrix(){
         System.out.println("----------- cost -----------------");
         for(int r = 0; r < nRow; r++){
             for(int c = 0; c < nCol; c++) {
-                System.out.print(String.format("%1$5s", costs[r][c]));
+                System.out.print(String.format("%1$6s", costs[r][c]));
             }
             System.out.print("\n");
         }
     }
 
-    private static void printMaskMatrix(){
+    private void printMaskMatrix(){
         System.out.println("----------- mask -----------------");
         for(int r = 0; r < nRow; r++){
             for(int c = 0; c < nCol; c++) {
-                System.out.print(String.format("%1$5s", masks[r][c]));
+                System.out.print(String.format("%1$6s", masks[r][c]));
             }
             System.out.print("\n");
         }
     }
 
-    private static void printCover(){
+    private void printCover(){
         System.out.println("----------- cover -----------------");
         System.out.println("rowCover：");
         for(int r = 0; r < nRow; r++) {
-            System.out.print(String.format("%1$5s", rowCover[r]));
+            System.out.print(String.format("%1$6s", rowCover[r]));
         }
         System.out.println("\ncolCover：");
         for(int c = 0; c < nCol; c++) {
-            System.out.print(String.format("%1$5s", colCover[c]));
+            System.out.print(String.format("%1$6s", colCover[c]));
         }
         System.out.println();
     }
 
-    private static void printPath(){
+    private void printPath(){
         System.out.println("paths：" + paths);
     }
 
@@ -387,7 +401,7 @@ public class Hungary {
      * 若元素为 0，且所在行、列均为覆盖标记，返回元素的坐标
      * @return
      */
-    private static MatrixItem findAZero(){
+    private MatrixItem findAZero(){
         int r = 0;
         int c;
         boolean done = false;
@@ -421,7 +435,7 @@ public class Hungary {
      * @param row
      * @return
      */
-    private static boolean starInRow(int row) {
+    private boolean starInRow(int row) {
         for(int c = 0; c < nCol; c++) {
             if(masks[row][c] == STARRED_ZERO) {
                 return true;
@@ -435,7 +449,7 @@ public class Hungary {
      * @param row
      * @return
      */
-    private static int findStarInRow(int row){
+    private int findStarInRow(int row){
         int col = -1;
         for(int c = 0; c < nCol; c++) {
             if(masks[row][c] == STARRED_ZERO) {
@@ -452,7 +466,7 @@ public class Hungary {
      * @param c
      * @return
      */
-    private static int findStarInCol(int c){
+    private int findStarInCol(int c){
         int r = -1;
         for(int i = 0; i < nRow; i++) {
             if(masks[i][c] == STARRED_ZERO) {
@@ -468,7 +482,7 @@ public class Hungary {
      * @param r
      * @return
      */
-    private static int findPrimeInRow(int r) {
+    private int findPrimeInRow(int r) {
         int c = -1;
         for(int j = 0; j< nCol; j++){
             if(masks[r][j] == PRIMED_ZERO) {
@@ -478,7 +492,7 @@ public class Hungary {
         return c;
     }
 
-    private static void augmentPath() {
+    private void augmentPath() {
         for(int p = 0; p < pathCount; p++) {
             MatrixItem path = getPath(p);
             if(masks[path.row][path.col] == STARRED_ZERO) {
@@ -492,7 +506,7 @@ public class Hungary {
     /**
      * 清空行、列覆盖标记
      */
-    private static void clearCovers(){
+    private void clearCovers(){
         for(int r = 0; r < nRow; r++) {
             rowCover[r] = UNCOVERED;
         }
@@ -504,7 +518,7 @@ public class Hungary {
     /**
      * 移除掩码矩阵中的划线0标记
      */
-    private static void erasePrimes(){
+    private void erasePrimes(){
         for(int r = 0; r < nRow; r++) {
             for(int c = 0; c < nCol; c++) {
                 if(masks[r][c] == PRIMED_ZERO) {
@@ -518,7 +532,7 @@ public class Hungary {
      * 从未覆盖的行、列元素中，找出最小的元素
      * @return
      */
-    private static int findSmallest(){
+    private int findSmallest(){
         int minVal = Integer.MAX_VALUE;
         for(int r = 0; r < nRow; r++) {
             for(int c = 0; c < nCol; c++) {
@@ -537,7 +551,7 @@ public class Hungary {
      * @param index
      * @return
      */
-    private static MatrixItem getPath(int index) {
+    private MatrixItem getPath(int index) {
         if(paths.size() <= index) {
             MatrixItem path = new MatrixItem();
             paths.add(path);
