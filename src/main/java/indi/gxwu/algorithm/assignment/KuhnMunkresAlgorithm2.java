@@ -7,6 +7,8 @@ import java.util.Arrays;
  * @date: 2022/8/31
  * @description:
  * https://www.pudn.com/news/62615bed0e75e42012408798.html
+ * n x m 矩阵，两个顶点集合之间不存在的路径，可以用 0 表示，可以求解最大、最小权值匹配。
+ * 不适用情况：如果 n > m 的情况无法被正常匹配，可以转换为 m x n 矩阵解决。
  **/
 public class KuhnMunkresAlgorithm2 {
 
@@ -17,42 +19,47 @@ public class KuhnMunkresAlgorithm2 {
     private int[] lx, ly;
     private int[] slack;
     private int[] matchYx;
+    private boolean debugger = false;
+    private boolean handleMaxCost = false;
 
-    public KuhnMunkresAlgorithm2(int[][] weight, boolean handleMaxCost) {
-        preProcess(weight, handleMaxCost);
+    public KuhnMunkresAlgorithm2(int[][] weight, boolean handleMaxCost, boolean debugger) {
+        this.debugger = debugger;
+        this.handleMaxCost = handleMaxCost;
+        preProcess(weight);
         printWeightMatrix();
     }
 
 
     public static void main(String[] args) {
         int[][] weights = new int[][] {
-                // x = y
+                //case 1、 x = y
 //                {3, 5, 5, 4},
 //                {2, 2, 0, 2},
 //                {2, 4, 4, 0},
 //                {0, 1, 0, 0},
 
-                // x < y
+                //case 2、  x < y
 //                {3, 5, 5, 4, 3},
 //                {2, 2, 0, 2, 5},
 //                {2, 4, 4, 0, 7},
 //                {0, 1, 0, 0, 3},
 
-                // x > y，有问题，最后一个x无法处理
+                //case 3、  x > y，有问题，最后一个x无法处理
 //                {3, 5, 5, 4},
 //                {2, 2, 0, 2},
 //                {2, 4, 4, 0},
 //                {0, 1, 0, 0},
 //                {3, 6, 4, 2},
 
-                //x > y，转换为 y-x
+                //case 4、 x > y，转换为 y-x
                 {3, 2, 2, 0, 3},
                 {5, 2, 4, 1, 6},
                 {5, 0, 4, 0, 4},
                 {4, 2, 0, 0, 2},
 
+
         };
-        KuhnMunkresAlgorithm2 km = new KuhnMunkresAlgorithm2(weights, false);
+        KuhnMunkresAlgorithm2 km = new KuhnMunkresAlgorithm2(weights, false, true);
         int[][] maxBipartie = km.getBipartie();
         km.printMaxBipartie(maxBipartie);
 
@@ -60,7 +67,7 @@ public class KuhnMunkresAlgorithm2 {
     }
 
 
-    private void preProcess(int[][] weight, boolean handleMaxCost) {
+    private void preProcess(int[][] weight) {
         lenX = weight.length;
         lenY = weight[0].length;
         maxN = Math.max(lenX, lenY);
@@ -110,6 +117,7 @@ public class KuhnMunkresAlgorithm2 {
      * @return
      */
     public int[][] getBipartie() {
+        long time1 = System.currentTimeMillis();
         //initialize memo data for class
         //initialize label X and Y
         Arrays.fill(ly, 0);
@@ -142,7 +150,7 @@ public class KuhnMunkresAlgorithm2 {
             while (true) {
                 totalLoopTimes++;
                 nodeLoopTimes++;
-                System.out.println("######### node X：" + u + "，loop time：" + nodeLoopTimes + " #########");
+                printLog("######### node X：" + u + "，loop time：" + nodeLoopTimes + " #########\n");
                 Arrays.fill(visitX, false);
                 Arrays.fill(visitY, false);
                 //if find it, go on to the next point
@@ -176,7 +184,7 @@ public class KuhnMunkresAlgorithm2 {
                 printVisit();
                 printL();
             }
-            System.out.println("######### total loop time：" + totalLoopTimes + " #########");
+            printLog("######### total loop time：" + totalLoopTimes + " #########\n");
 
         }
 
@@ -187,7 +195,11 @@ public class KuhnMunkresAlgorithm2 {
             }
         }
         System.out.println("total weight：" + totalWeight);
-        return matchResult();
+
+        int[][] result = matchResult();
+        long time2 = System.currentTimeMillis();
+        System.out.println("耗时：" + (time2 - time1));
+        return result;
     }
 
 
@@ -198,7 +210,7 @@ public class KuhnMunkresAlgorithm2 {
      */
     private boolean findPath(int nodeX) {
         visitX[nodeX] = true;
-        System.out.println("findPath check x："+ nodeX);
+        printLog("findPath check x："+ nodeX+"\n");
         for (int v = 0; v < maxN; v++) {
             //优化：在原来算法的基础上，对不存在的边进行过滤
             if (!visitY[v] && weights[nodeX][v] != 0) {
@@ -209,7 +221,7 @@ public class KuhnMunkresAlgorithm2 {
                     printVisit();
                     if (matchYx[v] == -1 || findPath(matchYx[v])) {
                         matchYx[v] = nodeX;
-                        System.out.println("findPath true x：" + nodeX + " y：" + v);
+                        printLog("findPath true x：" + nodeX + " y：" + v+"\n");
                         printMatch();
                         return true;
                     }
@@ -218,7 +230,7 @@ public class KuhnMunkresAlgorithm2 {
                 }
             }
         }
-        System.out.println("findPath false x：" + nodeX);
+        printLog("findPath false x：" + nodeX+"\n");
         printVisit();
         printMatch();
         return false;
@@ -238,54 +250,54 @@ public class KuhnMunkresAlgorithm2 {
     }
 
     private void printMatch(){
-        System.out.print("match-yx ");
+        printLog("match-yx ");
         int length = matchYx.length;
         for(int c = 0; c < length; c++) {
-            System.out.print(String.format("%1$6s", matchYx[c]));
+            printLog(String.format("%1$6s", matchYx[c]));
         }
-        System.out.print("\n");
+        printLog("\n");
 
     }
 
     private void printL(){
-        System.out.print("lx ");
+        printLog("lx ");
         int length = lx.length;
         for(int c = 0; c < length; c++) {
-            System.out.print(String.format("%1$6s", lx[c]));
+            printLog(String.format("%1$6s", lx[c]));
         }
-        System.out.print("\n");
-        System.out.print("ly ");
+        printLog("\n");
+        printLog("ly ");
         length = ly.length;
         for(int c = 0; c < length; c++) {
-            System.out.print(String.format("%1$6s", ly[c]));
+            printLog(String.format("%1$6s", ly[c]));
         }
-        System.out.print("\n");
+        printLog("\n");
 
     }
 
     private void printVisit(){
-        System.out.print("visitX ");
+        printLog("visitX ");
         int length = visitX.length;
         for(int c = 0; c < length; c++) {
-            System.out.print(String.format("%1$6s", visitX[c]));
+            printLog(String.format("%1$6s", visitX[c]));
         }
-        System.out.print("\n");
-        System.out.print("visitY ");
+        printLog("\n");
+        printLog("visitY ");
         length = visitY.length;
         for(int c = 0; c < length; c++) {
-            System.out.print(String.format("%1$6s", visitY[c]));
+            printLog(String.format("%1$6s", visitY[c]));
         }
-        System.out.print("\n");
+        printLog("\n");
 
     }
 
     private void printSlack(){
-        System.out.print("slack ");
+        printLog("slack ");
         int length = slack.length;
         for(int c = 0; c < length; c++) {
-            System.out.print("      "+slack[c]);
+            printLog("      "+slack[c]);
         }
-        System.out.print("\n");
+        printLog("\n");
     }
 
 
@@ -295,10 +307,20 @@ public class KuhnMunkresAlgorithm2 {
         int col = weights[0].length;
         for(int r = 0; r < row; r++){
             for(int c = 0; c < col; c++) {
-                System.out.print(String.format("%1$6s", weights[r][c]));
+                System.out.print(String.format("%1$6s", originalWeights[r][c]));
             }
             System.out.print("\n");
         }
+        if(!handleMaxCost) {
+            System.out.println("----------- transform weight matrix -----------------");
+            for(int r = 0; r < row; r++){
+                for(int c = 0; c < col; c++) {
+                    System.out.print(String.format("%1$6s", weights[r][c]));
+                }
+                System.out.print("\n");
+            }
+        }
+
     }
 
     public void printMaxBipartie(int[][] maxBipartie){
@@ -335,8 +357,12 @@ public class KuhnMunkresAlgorithm2 {
             }
             System.out.print("\n");
         }
+    }
 
-
+    private void printLog(String message) {
+        if(debugger) {
+            System.out.print(message);
+        }
     }
 
 }

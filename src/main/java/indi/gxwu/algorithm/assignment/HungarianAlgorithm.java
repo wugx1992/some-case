@@ -10,6 +10,9 @@ import java.util.List;
  * @date: 2022/8/29
  * @description:
  * https://brc2.com/the-algorithm-workshop/
+ * n x m 矩阵，不要求 n = m，求解最小权重
+ * 不适用情况：n x m 对应过来的二分图，必须是每个节点都有路径存在，比如 N0 必须 有 m 条连接到各个 M 节点 M0、M1、M2...Mm
+ * n x m 不存在的路径，不能用 0 代表，或最大值，不存在的路径都有可能被分配
  **/
 public class HungarianAlgorithm {
 
@@ -73,6 +76,27 @@ public class HungarianAlgorithm {
 
     public static void main(String[] args) {
         int[][] costs = new int[][]{
+                //case 1、 x = y
+                {3, 5, 5, 4},
+                {2, 2, 0, 2},
+                {2, 4, 4, 0},
+                {0, 1, 0, 0},
+
+                //case 2、  x < y
+//                {3, 5, 5, 4, 3},
+//                {2, 2, 0, 2, 5},
+//                {2, 4, 4, 0, 7},
+//                {0, 1, 0, 0, 3},
+
+                //case 3、 x > y
+//                {3, 5, 5, 4},
+//                {2, 2, 0, 2},
+//                {2, 4, 4, 0},
+//                {0, 1, 0, 0},
+//                {3, 6, 4, 2},
+
+
+
 //                {1, 2, 3},
 //                {2, 4, 6},
 //                {3, 6, 9},
@@ -87,11 +111,6 @@ public class HungarianAlgorithm {
 //                {11, 23, 14, 21, 10},
 //                {11, 23, 14, 21, 10},
 //                {11, 23, 14, 21, 10},
-
-                {3, 5, 5, 4},
-                {2, 2, 0, 2},
-                {2, 4, 4, 0},
-                {0, 1, 0, 0},
 
 
         };

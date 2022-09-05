@@ -7,6 +7,7 @@ import java.util.Arrays;
  * @date: 2022/8/31
  * @description:
  * https://www.pudn.com/news/62615bed0e75e42012408798.html
+ * 求解最大权值
  **/
 public class KuhnMunkresAlgorithm {
 
