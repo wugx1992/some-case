@@ -7,6 +7,7 @@ import java.util.Arrays;
  * @date: 2022/8/31
  * @description:
  * https://www.pudn.com/news/62615bed0e75e42012408798.html
+ * KM算法（通过遍历二部图中一边的顶点，冲突时调整顶点标杆的值，最后获得最佳匹配）
  * 求解最大权值
  **/
 public class KuhnMunkresAlgorithm {

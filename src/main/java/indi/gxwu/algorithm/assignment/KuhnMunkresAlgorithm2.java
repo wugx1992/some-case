@@ -7,6 +7,7 @@ import java.util.Arrays;
  * @date: 2022/8/31
  * @description:
  * https://www.pudn.com/news/62615bed0e75e42012408798.html
+ * KM算法（通过遍历二部图中一边的顶点，冲突时调整顶点标杆的值，最后获得最佳匹配）
  * n x m 矩阵，两个顶点集合之间不存在的路径，可以用 0 表示，可以求解最大、最小权值匹配。
  * 不适用情况：如果 n > m 的情况无法被正常匹配，可以转换为 m x n 矩阵解决。
  **/
@@ -59,9 +60,9 @@ public class KuhnMunkresAlgorithm2 {
 
 
         };
-        KuhnMunkresAlgorithm2 km = new KuhnMunkresAlgorithm2(weights, false, true);
+        KuhnMunkresAlgorithm2 km = new KuhnMunkresAlgorithm2(weights, true, true);
         int[][] maxBipartie = km.getBipartie();
-        km.printMaxBipartie(maxBipartie);
+        km.printBipartie(maxBipartie);
 
 
     }
@@ -323,15 +324,15 @@ public class KuhnMunkresAlgorithm2 {
 
     }
 
-    public void printMaxBipartie(int[][] maxBipartie){
-        System.out.println("----------- max bipartie -----------------");
-        if(maxBipartie == null) {
+    public void printBipartie(int[][] bipartie){
+        System.out.println("----------- bipartie -----------------");
+        if(bipartie == null) {
             System.out.println("null");
             return;
         }
-        int row = maxBipartie.length;
+        int row = bipartie.length;
         for(int r = 0; r < row; r++){
-            System.out.println(String.format("%1$6s", "X"+maxBipartie[r][0]) + String.format("%1$6s", "Y"+maxBipartie[r][1]));
+            System.out.println(String.format("%1$6s", "X"+bipartie[r][0]) + String.format("%1$6s", "Y"+bipartie[r][1]));
         }
 
         System.out.println("----------- match matrix -----------------");
@@ -341,10 +342,10 @@ public class KuhnMunkresAlgorithm2 {
             int matchX = -1;
             int matchY = -1;
             for(int c = 0; c < col; c++) {
-                for(int m = 0; m < maxBipartie.length; m ++) {
-                    if(maxBipartie[m][0] == r) {
+                for(int m = 0; m < bipartie.length; m ++) {
+                    if(bipartie[m][0] == r) {
                         matchX = m;
-                        matchY = maxBipartie[m][1];
+                        matchY = bipartie[m][1];
                         break;
                     }
                 }
