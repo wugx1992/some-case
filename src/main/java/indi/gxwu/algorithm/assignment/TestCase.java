@@ -52,20 +52,21 @@ public class TestCase {
 
 
     public static void runAssignment(int[][] weights){
+        System.out.println("================================================================");
+        System.out.println("==================      KuhnMunkres     =======================");
         KuhnMunkresAlgorithm2 kma = new KuhnMunkresAlgorithm2(weights, false, false);
-        int[][] bipartie = kma.getBipartie();
-        kma.printBipartie(bipartie);
+        AssignmentResult kmaResult = kma.getBipartie();
+        kmaResult.printMatchResult();
 
         System.out.println("================================================================");
-        System.out.println("================================================================");
-        System.out.println("================================================================");
+        System.out.println("=====================    Hungarian     =========================");
 
         HungarianAlgorithm2 ha = new HungarianAlgorithm2(weights, false, false);
-        ha.runMunkres();
+        AssignmentResult haResult = ha.runMunkres();
+        haResult.printMatchResult();
 
         System.out.println("================================================================");
-        System.out.println("================================================================");
-        System.out.println("================================================================");
+        System.out.println("=====================  BruteForceCase ==========================");
 
         BruteForceCase forceCase = new BruteForceCase(weights, false);
         forceCase.handle();

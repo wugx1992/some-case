@@ -130,13 +130,16 @@ public class HungarianAlgorithm2 {
 
         };
         HungarianAlgorithm2 hungarian = new HungarianAlgorithm2(costs, false, false);
+        hungarian.printCostMatrix();
         hungarian.runMunkres();
+        hungarian.printMatch();
+
     }
 
-    public void runMunkres(){
+    public AssignmentResult runMunkres(){
+        long t1 = System.currentTimeMillis();
         boolean done = false;
         int step = 1;
-        printCostMatrix();
         printLog("----------- START -----------------\n");
         int loop = 1;
         while (!done) {
@@ -171,7 +174,9 @@ public class HungarianAlgorithm2 {
             }
             loop++;
         }
-        finishPrint();
+        long t2 = System.currentTimeMillis();
+        System.out.println("耗时：" + (t2 -t1));
+        return convertResult();
     }
 
     /**
@@ -556,12 +561,32 @@ public class HungarianAlgorithm2 {
         }
     }
 
+    public AssignmentResult convertResult(){
+        List<Integer> matchIndex = new ArrayList<>();
+        int totalCost = 0;
+        for(int r = 0; r < nRow; r++){
+            int matchCol = -1;
+            for(int c = 0; c < nCol; c++) {
+                if(masks[r][c] == STARRED_ZERO) {
+                    totalCost += costsBackup[r][c];
+                    matchCol = c;
+                }
+            }
+            matchIndex.add(matchCol);
+        }
+        AssignmentResult result = new AssignmentResult();
+        result.setWeights(costsBackup);
+        result.setTotalWeight(totalCost);
+        result.setMatchIndex(matchIndex);
+        return result;
+    }
+
     /**
      *
      * @return
      */
-    private void finishPrint(){
-        System.out.println("----------- DONE -----------------");
+    public void printMatch(){
+        System.out.println("----------- match matrix -----------------");
         int totalCost = 0;
         for(int r = 0; r < nRow; r++){
             for(int c = 0; c < nCol; c++) {
@@ -579,7 +604,7 @@ public class HungarianAlgorithm2 {
         printPath();
     }
 
-    private void printCostMatrix(){
+    public void printCostMatrix(){
         System.out.println("----------- cost -----------------");
         for(int r = 0; r < nRow; r++){
             for(int c = 0; c < nCol; c++) {

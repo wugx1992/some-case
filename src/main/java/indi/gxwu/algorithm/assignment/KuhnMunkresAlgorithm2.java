@@ -1,6 +1,8 @@
 package indi.gxwu.algorithm.assignment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author: gx.wu
@@ -61,9 +63,7 @@ public class KuhnMunkresAlgorithm2 {
 
         };
         KuhnMunkresAlgorithm2 km = new KuhnMunkresAlgorithm2(weights, true, true);
-        int[][] maxBipartie = km.getBipartie();
-        km.printBipartie(maxBipartie);
-
+        AssignmentResult convertResult = km.getBipartie();
 
     }
 
@@ -117,7 +117,7 @@ public class KuhnMunkresAlgorithm2 {
      * 获取匹配的二部图
      * @return
      */
-    public int[][] getBipartie() {
+    public AssignmentResult getBipartie() {
         long time1 = System.currentTimeMillis();
         //initialize memo data for class
         //initialize label X and Y
@@ -189,18 +189,14 @@ public class KuhnMunkresAlgorithm2 {
 
         }
 
-        int totalWeight = 0;
-        for (int i = 0; i < maxN; i++) {
-            if (matchYx[i] >= 0) {
-                totalWeight += originalWeights[matchYx[i]][i];
-            }
-        }
-        System.out.println("total weight：" + totalWeight);
-
         int[][] result = matchResult();
+        if(debugger) {
+            printBipartie(result);
+            printMatch(result);
+        }
         long time2 = System.currentTimeMillis();
         System.out.println("耗时：" + (time2 - time1));
-        return result;
+        return convertResult(result);
     }
 
 
@@ -223,7 +219,7 @@ public class KuhnMunkresAlgorithm2 {
                     if (matchYx[v] == -1 || findPath(matchYx[v])) {
                         matchYx[v] = nodeX;
                         printLog("findPath true x：" + nodeX + " y：" + v+"\n");
-                        printMatch();
+                        printMatchYX();
                         return true;
                     }
                 } else {
@@ -233,7 +229,7 @@ public class KuhnMunkresAlgorithm2 {
         }
         printLog("findPath false x：" + nodeX+"\n");
         printVisit();
-        printMatch();
+        printMatchYX();
         return false;
     }
 
@@ -250,7 +246,7 @@ public class KuhnMunkresAlgorithm2 {
         return res;
     }
 
-    private void printMatch(){
+    private void printMatchYX(){
         printLog("match-yx ");
         int length = matchYx.length;
         for(int c = 0; c < length; c++) {
@@ -303,41 +299,44 @@ public class KuhnMunkresAlgorithm2 {
 
 
     private void printWeightMatrix(){
-        System.out.println("----------- weight matrix -----------------");
+        printLog("----------- weight matrix -----------------\n");
         int row = weights.length;
         int col = weights[0].length;
         for(int r = 0; r < row; r++){
             for(int c = 0; c < col; c++) {
-                System.out.print(String.format("%1$6s", originalWeights[r][c]));
+                printLog(String.format("%1$6s", originalWeights[r][c]));
             }
-            System.out.print("\n");
+            printLog("\n");
         }
         if(!handleMaxCost) {
-            System.out.println("----------- transform weight matrix -----------------");
+            printLog("----------- transform weight matrix -----------------\n");
             for(int r = 0; r < row; r++){
                 for(int c = 0; c < col; c++) {
-                    System.out.print(String.format("%1$6s", weights[r][c]));
+                    printLog(String.format("%1$6s", weights[r][c]));
                 }
-                System.out.print("\n");
+                printLog("\n");
             }
         }
 
     }
 
     public void printBipartie(int[][] bipartie){
-        System.out.println("----------- bipartie -----------------");
+        System.out.print("----------- bipartie -----------------\n");
         if(bipartie == null) {
-            System.out.println("null");
+            System.out.print("null\n");
             return;
         }
         int row = bipartie.length;
         for(int r = 0; r < row; r++){
-            System.out.println(String.format("%1$6s", "X"+bipartie[r][0]) + String.format("%1$6s", "Y"+bipartie[r][1]));
+            System.out.print(String.format("%1$6s", "X"+bipartie[r][0]) + String.format("%1$6s", "Y"+bipartie[r][1])+"\n");
         }
+    }
 
-        System.out.println("----------- match matrix -----------------");
-        row = originalWeights.length;
+    public void printMatch(int[][] bipartie){
+        System.out.print("----------- match matrix -----------------\n");
+        int row = originalWeights.length;
         int col = originalWeights[0].length;
+        int totalWeight = 0;
         for(int r = 0; r < row; r++){
             int matchX = -1;
             int matchY = -1;
@@ -352,12 +351,43 @@ public class KuhnMunkresAlgorithm2 {
                 String desc = "";
                 if(matchY == c) {
                     desc += "*";
+                    totalWeight += originalWeights[r][c];
                 }
                 desc += originalWeights[r][c];
                 System.out.print(String.format("%1$6s", desc));
             }
             System.out.print("\n");
         }
+
+        System.out.println("total weight：" + totalWeight);
+    }
+
+    public AssignmentResult convertResult(int[][] bipartie){
+        int row = originalWeights.length;
+        int col = originalWeights[0].length;
+        int totalWeight = 0;
+        List<Integer> matchIndex = new ArrayList<>();
+        for(int r = 0; r < row; r++){
+            int matchY = -1;
+            for(int c = 0; c < col; c++) {
+                for(int m = 0; m < bipartie.length; m ++) {
+                    if(bipartie[m][0] == r) {
+                        matchY = bipartie[m][1];
+                        break;
+                    }
+                }
+                if(matchY == c) {
+                    totalWeight += originalWeights[r][c];
+                }
+            }
+            matchIndex.add(matchY);
+        }
+
+        AssignmentResult result = new AssignmentResult();
+        result.setWeights(originalWeights);
+        result.setTotalWeight(totalWeight);
+        result.setMatchIndex(matchIndex);
+        return result;
     }
 
     private void printLog(String message) {
