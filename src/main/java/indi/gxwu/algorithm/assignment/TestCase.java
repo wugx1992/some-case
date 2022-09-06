@@ -38,8 +38,8 @@ public class TestCase {
 //
 //        };
 
-        int row = 4;
-        int col = 4;
+        int row = 6;
+        int col = 6;
         int[][] weights = new int[row][col];
         Random random = new Random();
         for(int i = 0; i < row; i++) {
@@ -50,27 +50,77 @@ public class TestCase {
         runAssignment(weights);
     }
 
+    @Test
+    public void verifyCorrectnessLoopTest () {
+        int row = 6;
+        int col = 6;
+        int loopTimes = 1000;
+        for(int t = 0; t < loopTimes; t++) {
+            System.out.println("\n============================  "+(t+1)+"  ===============================");
+            int[][] weights = new int[row][col];
+            Random random = new Random();
+            for (int i = 0; i < row; i++) {
+                for (int j = 0; j < row; j++) {
+                    weights[i][j] = random.nextInt(100);
+                }
+            }
+            boolean verifyTrue = runAssignment(weights);
+            if(!verifyTrue) {
+                System.err.println("算法匹配错误！");
+                break;
+            }
+        }
+    }
 
-    public static void runAssignment(int[][] weights){
+
+    public static boolean runAssignment(int[][] weights){
+        boolean handleMaxCost = false;
         System.out.println("================================================================");
-        System.out.println("==================      KuhnMunkres     =======================");
-        KuhnMunkresAlgorithm2 kma = new KuhnMunkresAlgorithm2(weights, false, false);
+        System.out.println("=========================     矩阵     ==========================");
+        printMatrix(weights);
+
+        System.out.println("================================================================");
+        System.out.println("=================  遍历所有情况方式（暴力）  =======================");
+        BruteForceCase forceCase = new BruteForceCase(weights, false);
+        forceCase.handle();
+
+        System.out.println("================================================================");
+        System.out.println("===================      KuhnMunkres     =======================");
+        KuhnMunkresAlgorithm2 kma = new KuhnMunkresAlgorithm2(weights, handleMaxCost, false);
         AssignmentResult kmaResult = kma.getBipartie();
         kmaResult.printMatchResult();
+        boolean matchResult1 = forceCase.isMatchResult(kmaResult, handleMaxCost);
+        if(matchResult1) {
+            System.out.println("验证正确");
+        }else{
+            System.err.println("验证错误");
+        }
 
         System.out.println("================================================================");
         System.out.println("=====================    Hungarian     =========================");
-
-        HungarianAlgorithm2 ha = new HungarianAlgorithm2(weights, false, false);
+        HungarianAlgorithm2 ha = new HungarianAlgorithm2(weights, handleMaxCost, false);
         AssignmentResult haResult = ha.runMunkres();
         haResult.printMatchResult();
+        boolean matchResult2 = forceCase.isMatchResult(haResult, handleMaxCost);
+        if(matchResult2) {
+            System.out.println("验证正确");
+        }else{
+            System.err.println("验证错误");
+        }
 
-        System.out.println("================================================================");
-        System.out.println("=====================  BruteForceCase ==========================");
-
-        BruteForceCase forceCase = new BruteForceCase(weights, false);
-        forceCase.handle();
+        return matchResult1 && matchResult2;
     }
 
+
+    public static void printMatrix(int weight[][]){
+        int nRow = weight.length;
+        int nCol = weight[0].length;
+        for(int r = 0; r < nRow; r++){
+            for(int c = 0; c < nCol; c++) {
+                System.out.print(String.format("%1$6s", weight[r][c]));
+            }
+            System.out.print("\n");
+        }
+    }
 
 }

@@ -22,6 +22,8 @@ public class BruteForceCase {
     private int lenX;
     private int lenY;
     private boolean debugger;
+    private List<AssignmentResult> matchMaxResult;
+    private List<AssignmentResult> matchMinResult;
 
 
     public static void main(String[] args) {
@@ -79,6 +81,8 @@ public class BruteForceCase {
         long time2 = System.currentTimeMillis();
         System.out.println("组合数量："+ indexResults.size() +"，耗时："+ (time2-time1));
 
+        this.matchMinResult = new ArrayList<>();
+        this.matchMaxResult = new ArrayList<>();
         //打印输出
         for(int row = 0; row < indexResults.size(); row ++) {
             List<Integer> match = indexResults.get(row);
@@ -96,6 +100,7 @@ public class BruteForceCase {
             if(!debugger && !matchMax && !matchMin) {
                 continue;
             }
+            List<Integer> matchIndex = new ArrayList<>();
 
             System.out.print(String.format("%1$6s  ", row));
 
@@ -105,6 +110,7 @@ public class BruteForceCase {
                     System.out.print(", ");
                 }
                 System.out.print(String.format("%1$3s", match.get(ii)));
+                matchIndex.add(match.get(ii));
             }
             System.out.print(" ]");
 
@@ -116,13 +122,21 @@ public class BruteForceCase {
                 System.out.print(String.format("%1$3s", weight.get(ii)));
             }
             System.out.print(" ]");
+
+            AssignmentResult rs = new AssignmentResult();
+            rs.setMatchIndex(matchIndex);
+            rs.setWeights(weights);
+            rs.setTotalWeight(totalWeight);
             if(personMatch == lenX && totalWeight == maxWeight) {
                 System.out.print(" MAX");
+                matchMaxResult.add(rs);
             }
             if(personMatch == lenX && totalWeight == minWeight) {
                 System.out.print(" MIN");
+                matchMinResult.add(rs);
             }
             System.out.println();
+
         }
     }
 
@@ -139,6 +153,40 @@ public class BruteForceCase {
             currentChoice.add(yi);
             getValue(currentChoice, x+1);
         }
+    }
+
+    /**
+     * 是否匹配权值
+     * @param target
+     * @param handleMaxCost
+     * @return
+     */
+    public boolean isMatchResult(AssignmentResult target, boolean handleMaxCost) {
+        if(target == null) {
+            return false;
+        }
+        List<AssignmentResult> matchs;
+        if(handleMaxCost) {
+            matchs = matchMaxResult;
+        }else{
+            matchs = matchMinResult;
+        }
+        for(AssignmentResult rs : matchs) {
+            if(rs.getTotalWeight() != target.getTotalWeight()) {
+                continue;
+            }
+            boolean mt = true;
+            for(int i = 0; i< rs.getMatchIndex().size(); i++) {
+                if(!rs.getMatchIndex().get(i).equals(target.getMatchIndex().get(i))) {
+                    mt = false;
+                    break;
+                }
+            }
+            if(mt) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
