@@ -15,7 +15,7 @@ import java.util.List;
  * 不适用情况：n x m 对应过来的二分图，必须是每个节点都有路径存在，比如 N0 必须 有 m 条连接到各个 M 节点 M0、M1、M2...Mm
  * n x m 中不存在的路径，不能用 0 或最大值来代表，不存在的路径都有可能被分配
  **/
-public class HungarianAlgorithm {
+public class HungarianAlgorithm2 {
 
     private int nRow;
     private int nCol;
@@ -47,13 +47,13 @@ public class HungarianAlgorithm {
         private int col;
     }
 
-    public HungarianAlgorithm(int[][] costs, boolean handleMaxCost, boolean debugger){
+    public HungarianAlgorithm2(int[][] costsParam, boolean handleMaxCost, boolean debugger){
         this.handleMaxCost = handleMaxCost;
         this.debugger = debugger;
-        this.costs = costs;
-        nRow = costs.length;
-        nCol = costs[0].length;
+        nRow = costsParam.length;
+        nCol = costsParam[0].length;
         masks = new int[nRow][nCol];
+        costs = new int[nRow][nCol];
         costsBackup = new int[nRow][nCol];
         rowCover = new int[nRow];
         colCover = new int[nCol];
@@ -61,9 +61,14 @@ public class HungarianAlgorithm {
         int maxValue = Integer.MIN_VALUE;
         for(int r = 0; r < nRow; r++) {
             for(int c = 0; c < nCol; c++) {
-                costsBackup[r][c] = costs[r][c];
-                if(maxValue < costs[r][c]) {
-                    maxValue = costs[r][c];
+                costs[r][c] = costsParam[r][c];
+                costsBackup[r][c] = costsParam[r][c];
+                //将不存在的边（0），修改Integer.MAX_VALUE
+                if(costsParam[r][c] == 0) {
+                    costs[r][c] = Integer.MAX_VALUE;
+                }
+                if(maxValue < costsParam[r][c]) {
+                    maxValue = costsParam[r][c];
                 }
             }
         }
@@ -71,7 +76,10 @@ public class HungarianAlgorithm {
         if(handleMaxCost) {
             for(int r = 0; r < nRow; r++) {
                 for(int c = 0; c < nCol; c++) {
-                    costs[r][c] = maxValue - costs[r][c];
+                    if(costsParam[r][c] == 0) {
+                        continue;
+                    }
+                    costs[r][c] = maxValue - costsParam[r][c];
                 }
             }
         }
@@ -115,14 +123,13 @@ public class HungarianAlgorithm {
 //                {11, 23, 14, 21, 10},
 //                {11, 23, 14, 21, 10},
 
-
-                {4,     6,     8,     3 },
-                {1,     5,     2,     3 },
-                {6,     6,     8,     0 },
-                {9,     8,     7,     6 },
+                {3, 5, 5, 4},
+                {2, 2, 0, 2},
+                {2, 4, 4, 0},
+                {0, 1, 0, 0},
 
         };
-        HungarianAlgorithm hungarian = new HungarianAlgorithm(costs, true, false);
+        HungarianAlgorithm2 hungarian = new HungarianAlgorithm2(costs, false, false);
         hungarian.runMunkres();
     }
 
@@ -174,21 +181,24 @@ public class HungarianAlgorithm {
      * @return
      */
     private int stepOne(){
-        int minInRow, minC;
+        int minCost, col;
         for(int r = 0; r < nRow; r++) {
-            minInRow = costs[r][0];
-            minC = 0;
+            minCost = costs[r][0];
+            col = 0;
             //求该行最小元素
             for(int c = 0; c < nCol; c++) {
-                if(costs[r][c] < minInRow) {
-                    minInRow = costs[r][c];
-                    minC = c;
+                if(costs[r][c] < minCost) {
+                    minCost = costs[r][c];
+                    col = c;
                 }
             }
-            printLog("当前行最小值：" + minInRow +" 所在行/列：" + r +" / " + minC+"\n");
+            printLog("当前行最小值：" + minCost +" 所在行/列：" + r +" / " + col+"\n");
             //该行所有元素减去最小值，使每行都至少有一个0元素
             for(int c = 0; c < nCol; c++) {
-                costs[r][c] -= minInRow;
+                if(costs[r][c] == Integer.MAX_VALUE) {
+                    continue;
+                }
+                costs[r][c] -= minCost;
             }
         }
         return STEP_TWO;
@@ -365,6 +375,9 @@ public class HungarianAlgorithm {
         printLog("未覆盖元素中，最小值：" + minVal+"\n");
         for(int r = 0; r < nRow; r++) {
             for(int c = 0; c < nCol; c++) {
+                if(costs[r][c] == Integer.MAX_VALUE) {
+                    continue;
+                }
                 if(rowCover[r] == COVERED) {
                     costs[r][c] += minVal;
                 }
@@ -374,66 +387,6 @@ public class HungarianAlgorithm {
             }
         }
         return STEP_FOUR;
-    }
-
-    /**
-     *
-     * @return
-     */
-    private void finishPrint(){
-        System.out.println("----------- DONE -----------------");
-        int totalCost = 0;
-        for(int r = 0; r < nRow; r++){
-            for(int c = 0; c < nCol; c++) {
-                String result = "";
-                if(masks[r][c] == STARRED_ZERO) {
-                    result = "*";
-                    totalCost += costsBackup[r][c];
-                }
-                result += costsBackup[r][c];
-                System.out.print(String.format("%1$6s", result));
-            }
-            System.out.print("\n");
-        }
-        System.out.println("total weight：" + totalCost);
-        printPath();
-    }
-
-    private void printCostMatrix(){
-        System.out.println("----------- cost -----------------");
-        for(int r = 0; r < nRow; r++){
-            for(int c = 0; c < nCol; c++) {
-                System.out.print(String.format("%1$6s", costs[r][c]));
-            }
-            System.out.print("\n");
-        }
-    }
-
-    private void printMaskMatrix(){
-        printLog("----------- mask -----------------\n");
-        for(int r = 0; r < nRow; r++){
-            for(int c = 0; c < nCol; c++) {
-                printLog(String.format("%1$6s", masks[r][c]));
-            }
-            printLog("\n");
-        }
-    }
-
-    private void printCover(){
-        printLog("----------- cover -----------------");
-        printLog("rowCover：");
-        for(int r = 0; r < nRow; r++) {
-            printLog(String.format("%1$6s", rowCover[r]));
-        }
-        printLog("\ncolCover：");
-        for(int c = 0; c < nCol; c++) {
-            printLog(String.format("%1$6s", colCover[c]));
-        }
-        printLog("\n");
-    }
-
-    private void printPath(){
-        printLog("paths：" + paths +"\n");
     }
 
     /**
@@ -602,6 +555,71 @@ public class HungarianAlgorithm {
             return paths.get(index);
         }
     }
+
+    /**
+     *
+     * @return
+     */
+    private void finishPrint(){
+        System.out.println("----------- DONE -----------------");
+        int totalCost = 0;
+        for(int r = 0; r < nRow; r++){
+            for(int c = 0; c < nCol; c++) {
+                String result = "";
+                if(masks[r][c] == STARRED_ZERO) {
+                    result = "*";
+                    totalCost += costsBackup[r][c];
+                }
+                result += costsBackup[r][c];
+                System.out.print(String.format("%1$6s", result));
+            }
+            System.out.print("\n");
+        }
+        System.out.println("total weight：" + totalCost);
+        printPath();
+    }
+
+    private void printCostMatrix(){
+        System.out.println("----------- cost -----------------");
+        for(int r = 0; r < nRow; r++){
+            for(int c = 0; c < nCol; c++) {
+                String des = costs[r][c]+"";
+                if(costs[r][c] == Integer.MAX_VALUE) {
+                    des = "MAX";
+                }
+                System.out.print(String.format("%1$6s", des));
+            }
+            System.out.print("\n");
+        }
+    }
+
+    private void printMaskMatrix(){
+        printLog("----------- mask -----------------\n");
+        for(int r = 0; r < nRow; r++){
+            for(int c = 0; c < nCol; c++) {
+                printLog(String.format("%1$6s", masks[r][c]));
+            }
+            printLog("\n");
+        }
+    }
+
+    private void printCover(){
+        printLog("----------- cover -----------------");
+        printLog("rowCover：");
+        for(int r = 0; r < nRow; r++) {
+            printLog(String.format("%1$6s", rowCover[r]));
+        }
+        printLog("\ncolCover：");
+        for(int c = 0; c < nCol; c++) {
+            printLog(String.format("%1$6s", colCover[c]));
+        }
+        printLog("\n");
+    }
+
+    private void printPath(){
+        printLog("paths：" + paths +"\n");
+    }
+
 
     private void printLog(String message) {
         if(debugger) {

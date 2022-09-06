@@ -52,9 +52,16 @@ public class TestCase {
 
 
     public static void runAssignment(int[][] weights){
-        KuhnMunkresAlgorithm2 km = new KuhnMunkresAlgorithm2(weights, false, false);
-        int[][] bipartie = km.getBipartie();
-        km.printBipartie(bipartie);
+        KuhnMunkresAlgorithm2 kma = new KuhnMunkresAlgorithm2(weights, false, false);
+        int[][] bipartie = kma.getBipartie();
+        kma.printBipartie(bipartie);
+
+        System.out.println("================================================================");
+        System.out.println("================================================================");
+        System.out.println("================================================================");
+
+        HungarianAlgorithm2 ha = new HungarianAlgorithm2(weights, false, false);
+        ha.runMunkres();
 
         System.out.println("================================================================");
         System.out.println("================================================================");
