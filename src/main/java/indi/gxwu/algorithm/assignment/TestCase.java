@@ -52,8 +52,8 @@ public class TestCase {
 
     @Test
     public void verifyCorrectnessLoopTest () {
-        int row = 6;
-        int col = 6;
+        int row = 5;
+        int col = 5;
         int loopTimes = 1000;
         for(int t = 0; t < loopTimes; t++) {
             System.out.println("\n============================  "+(t+1)+"  ===============================");
@@ -61,7 +61,7 @@ public class TestCase {
             Random random = new Random();
             for (int i = 0; i < row; i++) {
                 for (int j = 0; j < row; j++) {
-                    weights[i][j] = random.nextInt(100);
+                    weights[i][j] = random.nextInt(10);
                 }
             }
             boolean verifyTrue = runAssignment(weights);
@@ -108,7 +108,19 @@ public class TestCase {
             System.err.println("验证错误");
         }
 
-        return matchResult1 && matchResult2;
+        System.out.println("================================================================");
+        System.out.println("=====================  Hungarian two   =========================");
+        HungarianTwoAlgorithm hat = new HungarianTwoAlgorithm(weights, handleMaxCost, false);
+        AssignmentResult hatResult = hat.runMunkres();
+        hatResult.printMatchResult();
+        boolean matchResult3 = forceCase.isMatchResult(hatResult, handleMaxCost);
+        if(matchResult3) {
+            System.out.println("验证正确");
+        }else{
+            System.err.println("验证错误");
+        }
+
+        return matchResult1 && matchResult2 && matchResult3;
     }
 
 

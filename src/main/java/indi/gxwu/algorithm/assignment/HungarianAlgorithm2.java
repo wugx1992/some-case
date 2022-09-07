@@ -629,7 +629,7 @@ public class HungarianAlgorithm2 {
     }
 
     private void printCover(){
-        printLog("----------- cover -----------------");
+        printLog("----------- cover -----------------\n");
         printLog("rowCover：");
         for(int r = 0; r < nRow; r++) {
             printLog(String.format("%1$6s", rowCover[r]));
