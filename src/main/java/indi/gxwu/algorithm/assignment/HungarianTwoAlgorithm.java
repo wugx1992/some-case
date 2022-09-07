@@ -108,18 +108,18 @@ public class HungarianTwoAlgorithm {
 //                {0, 1, 0, 0},
 
 
-//                { 52,    49,    26,    36,     3,    53,    62,    15,    93 },
-//                { 16,    90,    31,    94,     4,    76,    45,    14,    77 },
-//                { 17,    89,    13,    32,    43,    41,    95,     6,    35 },
-//                { 19,    86,    64,     4,    60,    93,    15,    71,    68 },
-//                { 37,    31,    79,    90,    47,    10,    38,    48,    81 },
-//                { 42,    77,    35,    84,    47,    28,    83,    28,    53 },
-//                { 29,    30,    22,    82,    74,     4,    58,    85,     7 },
-//                { 47,     4,    78,    46,    80,     9,    24,    51,    22 },
-//                { 28,    94,    20,    46,    80,     6,    86,    49,    98 },
-////        3242   [  0,   1,   6,   5,   2,   3,   7,   4,   8 ] [ 52,  90,  95,  93,  79,  84,  85,  80,  98,   9, 756 ] MAX
-////        162184   [  4,   0,   2,   3,   6,   7,   8,   1,   5 ] [  3,  16,  13,   4,  38,  28,   7,   4,   6,   9, 119 ] MIN
-////        165202   [  4,   0,   7,   3,   6,   2,   8,   1,   5 ] [  3,  16,   6,   4,  38,  35,   7,   4,   6,   9, 119 ] MIN
+                { 52,    49,    26,    36,     3,    53,    62,    15,    93 },
+                { 16,    90,    31,    94,     4,    76,    45,    14,    77 },
+                { 17,    89,    13,    32,    43,    41,    95,     6,    35 },
+                { 19,    86,    64,     4,    60,    93,    15,    71,    68 },
+                { 37,    31,    79,    90,    47,    10,    38,    48,    81 },
+                { 42,    77,    35,    84,    47,    28,    83,    28,    53 },
+                { 29,    30,    22,    82,    74,     4,    58,    85,     7 },
+                { 47,     4,    78,    46,    80,     9,    24,    51,    22 },
+                { 28,    94,    20,    46,    80,     6,    86,    49,    98 },
+//        3242   [  0,   1,   6,   5,   2,   3,   7,   4,   8 ] [ 52,  90,  95,  93,  79,  84,  85,  80,  98,   9, 756 ] MAX
+//        162184   [  4,   0,   2,   3,   6,   7,   8,   1,   5 ] [  3,  16,  13,   4,  38,  28,   7,   4,   6,   9, 119 ] MIN
+//        165202   [  4,   0,   7,   3,   6,   2,   8,   1,   5 ] [  3,  16,   6,   4,  38,  35,   7,   4,   6,   9, 119 ] MIN
 
 //                {0,     1,     7,     4,     0 },
 //                {7,     6,     5,     2,     3 },
@@ -250,44 +250,8 @@ public class HungarianTwoAlgorithm {
         clearMask();
         //变换掩码矩阵
         transformMask();
-        //打钩行
-        List<Integer> tickRow = new ArrayList<>();
-        //打钩列
-        List<Integer> tickCol = new ArrayList<>();
-        //遍历掩码矩阵，查找行不存在星0，打钩
-        for(int r = 0; r < nRow; r++) {
-            boolean hasStarZero = false;
-            for(int c = 0; c < nCol; c++) {
-                if(masks[r][c] == STARRED_ZERO) {
-                    hasStarZero = true;
-                    break;
-                }
-            }
-            if(!hasStarZero) {
-                tickRow.add(r);
-            }
-        }
-        //遍历打钩行，查找存在划线0的列，打钩
-        for(int i = 0; i < tickRow.size(); i++) {
-            for(int c = 0; c < nCol; c++) {
-                if(masks[tickRow.get(i)][c] == PRIMED_ZERO) {
-                    if(!tickCol.contains(c)) {
-                        tickCol.add(c);
-                    }
-                }
-            }
-        }
-        //遍历打钩列，寻找存在星0的行，打钩
-        for(int i = 0; i < tickCol.size(); i++) {
-            for(int r = 0; r < nRow; r++) {
-                if(masks[r][tickCol.get(i)] == STARRED_ZERO) {
-                    if(!tickRow.contains(r)) {
-                        tickRow.add(r);
-                    }
-                }
-            }
-        }
-
+        //对行、列进行打钩
+        tickRowAndCol();
 
         /**
          * 尝试寻找最优解（覆盖0线）
@@ -295,17 +259,20 @@ public class HungarianTwoAlgorithm {
          * 1、未被打钩的行，算一条线
          * 2、已被打钩的列，算一条线
          */
-        int countLines = (nRow - tickRow.size()) + tickCol.size();
+        //计算一共使用多少条线路覆盖所有零
+        int countLines = 0;
         for(int r = 0; r < nRow; r++) {
-            //未被打钩的行，算一条线
-            if(!tickRow.contains(r)) {
-                rowCover[r] = COVERED;
+            //覆盖情况取反，因为行打钩和是否覆盖是相反的。
+            rowCover[r] = rowCover[r] == COVERED?UNCOVERED:COVERED;
+            if(rowCover[r] == COVERED) {
+                countLines++;
             }
         }
         for(int c = 0; c < nCol; c++) {
             //已被打钩的列，算一条线
-            if(tickCol.contains(c)) {
+            if(colCover[c] == COVERED) {
                 colCover[c] = COVERED;
+                countLines++;
             }
         }
         printLog("覆盖0的最小线路条数：" + countLines+"\n");
@@ -403,6 +370,66 @@ public class HungarianTwoAlgorithm {
         }
         //递归调用，处理剩余的元素
         transformMask();
+    }
+
+    /**
+     * 打钩处理行、列情况
+     */
+    private void tickRowAndCol(){
+        //打钩行
+        List<Integer> tickRow = new ArrayList<>();
+        //遍历掩码矩阵，查找行不存在星0，打钩
+        for(int r = 0; r < nRow; r++) {
+            boolean hasStarZero = false;
+            for(int c = 0; c < nCol; c++) {
+                if(masks[r][c] == STARRED_ZERO) {
+                    hasStarZero = true;
+                    break;
+                }
+            }
+            if(!hasStarZero) {
+                tickRow.add(r);
+                rowCover[r] = COVERED;
+            }
+        }
+        iterationTick(tickRow);
+    }
+
+    /**
+     * 递归遍历行打钩情况，转列打钩->行打钩->列打钩
+     * @param preTickRow
+     */
+    private void iterationTick(List<Integer> preTickRow){
+        if(preTickRow.size() == 0) {
+            return;
+        }
+        //打钩列
+        List<Integer> tickCol = new ArrayList<>();
+        //遍历打钩行，查找存在划线0的列，打钩
+        for(int i = 0; i < preTickRow.size(); i++) {
+            for(int c = 0; c < nCol; c++) {
+                if(masks[preTickRow.get(i)][c] == PRIMED_ZERO && colCover[c] == UNCOVERED) {
+                    if(!tickCol.contains(c)) {
+                        tickCol.add(c);
+                        colCover[c] = COVERED;
+                    }
+                }
+            }
+        }
+
+        List<Integer> tickRow = new ArrayList<>();
+        //遍历打钩列，寻找存在星0的行，打钩
+        for(int i = 0; i < tickCol.size(); i++) {
+            for(int r = 0; r < nRow; r++) {
+                if(masks[r][tickCol.get(i)] == STARRED_ZERO && rowCover[r] == UNCOVERED) {
+                    if(!tickRow.contains(r)) {
+                        tickRow.add(r);
+                        rowCover[r] = COVERED;
+                    }
+                }
+            }
+        }
+        iterationTick(tickRow);
     }
 
     /**
