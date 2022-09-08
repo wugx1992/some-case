@@ -14,7 +14,9 @@ import java.util.Random;
 public class TestCase {
 
 
-
+    /**
+     * 随机验证一个矩阵的分配问题
+     */
     @Test
     public void verifyCorrectnessTest () {
 
@@ -41,30 +43,21 @@ public class TestCase {
 
         int row = 6;
         int col = 6;
-        int[][] weights = new int[row][col];
-        Random random = new Random();
-        for(int i = 0; i < row; i++) {
-            for(int j = 0; j < row; j++) {
-                weights[i][j] = random.nextInt(10);
-            }
-        }
+        int[][] weights = generateMatrix(row, col);
         runAssignment(weights);
     }
 
+    /**
+     * 循环随机多个矩阵验证分配问题
+     */
     @Test
     public void verifyCorrectnessLoopTest () {
-        int row = 5;
-        int col = 5;
-        int loopTimes = 1000;
+        int row = 8;
+        int col = 8;
+        int loopTimes = 5000;
         for(int t = 0; t < loopTimes; t++) {
             System.out.println("\n============================  "+(t+1)+"  ===============================");
-            int[][] weights = new int[row][col];
-            Random random = new Random();
-            for (int i = 0; i < row; i++) {
-                for (int j = 0; j < row; j++) {
-                    weights[i][j] = random.nextInt(10);
-                }
-            }
+            int[][] weights = generateMatrix(row, col);
             boolean verifyTrue = runAssignment(weights);
             if(!verifyTrue) {
                 System.err.println("算法匹配错误！");
@@ -133,6 +126,34 @@ public class TestCase {
         return matchResult1 && matchResult2 && matchResult3;
     }
 
+    private static int[][] generateMatrix(int row, int col){
+        int[][] weights = new int[row][col];
+        Random random = new Random();
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < row; j++) {
+                weights[i][j] = random.nextInt(10);
+            }
+        }
+        //排除某一项任务，所有人都没有能力胜任（整列都为0）
+        boolean available = true;
+        for(int c = 0; c < col; c++) {
+            boolean allZero = true;
+            for(int r = 0; r < row; r++) {
+                if(weights[r][c] != 0) {
+                    allZero = false;
+                    break;
+                }
+            }
+            if(allZero) {
+                available = false;
+                break;
+            }
+        }
+        if(!available) {
+            return generateMatrix(row, col);
+        }
+        return weights;
+    }
 
     public static void printMatrix(int weight[][]){
         int nRow = weight.length;
