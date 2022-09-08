@@ -2,6 +2,7 @@ package indi.gxwu.algorithm.assignment;
 
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -110,15 +111,24 @@ public class TestCase {
 
         System.out.println("================================================================");
         System.out.println("=====================  Hungarian two   =========================");
-        HungarianTwoAlgorithm hat = new HungarianTwoAlgorithm(weights, handleMaxCost, false);
-        AssignmentResult hatResult = hat.runMunkres();
-        hatResult.printMatchResult();
-        boolean matchResult3 = forceCase.isMatchResult(hatResult, handleMaxCost);
-        if(matchResult3) {
-            System.out.println("验证正确");
-        }else{
-            System.err.println("验证错误");
+        HungarianTwoAlgorithm2 hat = new HungarianTwoAlgorithm2(weights, handleMaxCost, false);
+        List<AssignmentResult> hatResult = hat.runMunkres();
+        boolean matchResult3 = true;
+        if(hatResult.size()==0) {
+            matchResult3 = false;
         }
+        for(AssignmentResult assignment : hatResult){
+            assignment.printMatchResult();
+            boolean match = forceCase.isMatchResult(assignment, handleMaxCost);
+            if(match) {
+                System.out.println("验证正确");
+            }else{
+                System.err.println("验证错误");
+                matchResult3 = false;
+            }
+            System.out.println("----------------------------------------------------------------");
+        }
+
 
         return matchResult1 && matchResult2 && matchResult3;
     }

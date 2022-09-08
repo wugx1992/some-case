@@ -2,6 +2,7 @@ package indi.gxwu.algorithm.assignment;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,6 +26,7 @@ public class AssignmentResult {
         }
         System.out.print(" ]");
 
+        List<Integer> matchWeights = new ArrayList<>();
         System.out.print(" [");
         for(int ii = 0; ii < matchIndex.size(); ii++) {
             if(ii > 0) {
@@ -35,11 +37,25 @@ public class AssignmentResult {
                 desc = "-1";
             }else{
                 desc = weights[ii][matchIndex.get(ii)]+"";
+                matchWeights.add(weights[ii][matchIndex.get(ii)]);
             }
             System.out.print(String.format("%1$3s", desc));
         }
         System.out.print(" ]");
         System.out.print(" total weight：" + totalWeight);
+
+        //获取方差
+        if(matchWeights.size() > 0) {
+            double avg = ((double) totalWeight)/matchWeights.size();
+            double variance = 0;
+            for(int weight : matchWeights) {
+                variance += Math.pow((weight-avg), 2);
+            }
+            variance = variance / matchWeights.size();
+            variance = Math.sqrt(variance);
+            System.out.print(" variance："+variance);
+        }
+
         System.out.println();
 
     }

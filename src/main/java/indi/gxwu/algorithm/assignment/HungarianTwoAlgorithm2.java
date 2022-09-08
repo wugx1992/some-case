@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author: gx.wu
@@ -12,16 +13,18 @@ import java.util.List;
  * @description:
  * https://www.hungarianalgorithm.com/hungarianalgorithm.php
  * 匈牙利算法（通过矩阵行、列处理，尽可能出现0，然后寻找以最少画线覆盖所有0的条数，来判断是否寻找到最佳匹配）
+ * 矩阵相同权重时，可能存在多条匹配路径，尝试寻找出所有匹配（最多只匹配10条）
  * n x m 矩阵，不要求 n = m，求解最小权重（求最大权重，可以将所有原权重取反，减去其中最小值）
  * 不适用情况：如果 n > m 的情况无法被正常匹配，可以转换为 m x n 矩阵解决。
  **/
-public class HungarianTwoAlgorithm {
+public class HungarianTwoAlgorithm2 {
 
     private int nRow;
     private int nCol;
     private int[][] costs;
     private int[][] costsBackup;
     private int[][] masks;
+    private List<List<List<Integer>>> matchMasks;
     private int[] rowCover;
     private int[] colCover;
     private boolean debugger = false;
@@ -42,7 +45,7 @@ public class HungarianTwoAlgorithm {
         private int col;
     }
 
-    public HungarianTwoAlgorithm(int[][] costsParam, boolean handleMaxCost, boolean debugger){
+    public HungarianTwoAlgorithm2(int[][] costsParam, boolean handleMaxCost, boolean debugger){
         this.handleMaxCost = handleMaxCost;
         this.debugger = debugger;
         nRow = costsParam.length;
@@ -52,6 +55,7 @@ public class HungarianTwoAlgorithm {
         costsBackup = new int[nRow][nCol];
         rowCover = new int[nRow];
         colCover = new int[nCol];
+        matchMasks = new ArrayList<>();
         int maxValue = Integer.MIN_VALUE;
         for(int r = 0; r < nRow; r++) {
             for(int c = 0; c < nCol; c++) {
@@ -100,11 +104,11 @@ public class HungarianTwoAlgorithm {
 //                {0, 1, 0, 0},
 //                {3, 6, 4, 2},
 
-                //x > y时，x、y反转
-                {3, 2, 2, 0, 3},
-                {5, 2, 4, 1, 6},
-                {5, 0, 4, 0, 4},
-                {4, 2, 0, 0, 2},
+//                //x > y时，x、y反转
+//                {3, 2, 2, 0, 3},
+//                {5, 2, 4, 1, 6},
+//                {5, 0, 4, 0, 4},
+//                {4, 2, 0, 0, 2},
 
 //                {2, 2, 2, 2},
 //                {2, 2, 2, 2},
@@ -117,18 +121,18 @@ public class HungarianTwoAlgorithm {
 //                {0, 1, 0, 0},
 
 
-//                { 52,    49,    26,    36,     3,    53,    62,    15,    93 },
-//                { 16,    90,    31,    94,     4,    76,    45,    14,    77 },
-//                { 17,    89,    13,    32,    43,    41,    95,     6,    35 },
-//                { 19,    86,    64,     4,    60,    93,    15,    71,    68 },
-//                { 37,    31,    79,    90,    47,    10,    38,    48,    81 },
-//                { 42,    77,    35,    84,    47,    28,    83,    28,    53 },
-//                { 29,    30,    22,    82,    74,     4,    58,    85,     7 },
-//                { 47,     4,    78,    46,    80,     9,    24,    51,    22 },
-//                { 28,    94,    20,    46,    80,     6,    86,    49,    98 },
-////        3242   [  0,   1,   6,   5,   2,   3,   7,   4,   8 ] [ 52,  90,  95,  93,  79,  84,  85,  80,  98,   9, 756 ] MAX
-////        162184   [  4,   0,   2,   3,   6,   7,   8,   1,   5 ] [  3,  16,  13,   4,  38,  28,   7,   4,   6,   9, 119 ] MIN
-////        165202   [  4,   0,   7,   3,   6,   2,   8,   1,   5 ] [  3,  16,   6,   4,  38,  35,   7,   4,   6,   9, 119 ] MIN
+                { 52,    49,    26,    36,     3,    53,    62,    15,    93 },
+                { 16,    90,    31,    94,     4,    76,    45,    14,    77 },
+                { 17,    89,    13,    32,    43,    41,    95,     6,    35 },
+                { 19,    86,    64,     4,    60,    93,    15,    71,    68 },
+                { 37,    31,    79,    90,    47,    10,    38,    48,    81 },
+                { 42,    77,    35,    84,    47,    28,    83,    28,    53 },
+                { 29,    30,    22,    82,    74,     4,    58,    85,     7 },
+                { 47,     4,    78,    46,    80,     9,    24,    51,    22 },
+                { 28,    94,    20,    46,    80,     6,    86,    49,    98 },
+//        3242   [  0,   1,   6,   5,   2,   3,   7,   4,   8 ] [ 52,  90,  95,  93,  79,  84,  85,  80,  98,   9, 756 ] MAX
+//        162184   [  4,   0,   2,   3,   6,   7,   8,   1,   5 ] [  3,  16,  13,   4,  38,  28,   7,   4,   6,   9, 119 ] MIN
+//        165202   [  4,   0,   7,   3,   6,   2,   8,   1,   5 ] [  3,  16,   6,   4,  38,  35,   7,   4,   6,   9, 119 ] MIN
 
 //                {0,     1,     7,     4,     0 },
 //                {7,     6,     5,     2,     3 },
@@ -139,15 +143,19 @@ public class HungarianTwoAlgorithm {
 ////        76   [  3,   0,   4,   1,   2 ] [  4,   7,   8,   8,   9,   5,  36 ] MAX
 ////        91   [  3,   4,   0,   2,   1 ] [  4,   3,   7,   3,   1,   5,  18 ] MIN
         };
-        HungarianTwoAlgorithm hungarian = new HungarianTwoAlgorithm(costs, false, true);
+        HungarianTwoAlgorithm2 hungarian = new HungarianTwoAlgorithm2(costs, false, true);
         hungarian.printCostMatrix();
-        AssignmentResult result = hungarian.runMunkres();
-        result.printMatchResult();
-        result.printMatchMatrix();
+        List<AssignmentResult> result = hungarian.runMunkres();
+        for(AssignmentResult assignment : result) {
+            System.out.println("---------------------------");
+            assignment.printMatchResult();
+            assignment.printMatchMatrix();
+        }
+
 
     }
 
-    public AssignmentResult runMunkres(){
+    public List<AssignmentResult> runMunkres(){
         long t1 = System.currentTimeMillis();
         boolean done = false;
         int step = 1;
@@ -179,9 +187,10 @@ public class HungarianTwoAlgorithm {
             }
             loop++;
         }
+        List<AssignmentResult> result = convertResult();
         long t2 = System.currentTimeMillis();
         System.out.println("耗时：" + (t2 -t1));
-        return convertResult();
+        return result;
     }
 
     /**
@@ -579,26 +588,31 @@ public class HungarianTwoAlgorithm {
         }
     }
 
-    public AssignmentResult convertResult(){
+    public List<AssignmentResult> convertResult(){
         clearCovers();
         clearMask();
         findMatch(0);
-        List<Integer> matchIndex = new ArrayList<>();
-        int totalCost = 0;
-        for(int r = 0; r < nRow; r++){
-            int matchCol = -1;
-            for(int c = 0; c < nCol; c++) {
-                if(masks[r][c] == COVERED) {
-                    totalCost += costsBackup[r][c];
-                    matchCol = c;
+        List<AssignmentResult> result = new ArrayList<>();
+        for(List<List<Integer>> currentMasks : matchMasks) {
+            List<Integer> matchIndex = new ArrayList<>();
+            int totalCost = 0;
+            for(int r = 0; r < nRow; r++){
+                List<Integer> rowInfo = currentMasks.get(r);
+                int matchCol = -1;
+                for(int c = 0; c < nCol; c++) {
+                    if(rowInfo.get(c) == COVERED) {
+                        totalCost += costsBackup[r][c];
+                        matchCol = c;
+                    }
                 }
+                matchIndex.add(matchCol);
             }
-            matchIndex.add(matchCol);
+            AssignmentResult assignment = new AssignmentResult();
+            assignment.setWeights(costsBackup);
+            assignment.setTotalWeight(totalCost);
+            assignment.setMatchIndex(matchIndex);
+            result.add(assignment);
         }
-        AssignmentResult result = new AssignmentResult();
-        result.setWeights(costsBackup);
-        result.setTotalWeight(totalCost);
-        result.setMatchIndex(matchIndex);
         return result;
     }
 
@@ -609,6 +623,7 @@ public class HungarianTwoAlgorithm {
      */
     private boolean findMatch(int row){
         if(row >= nRow) {
+            addMatchMasks();
             return true;
         }
         //已被覆盖
@@ -631,7 +646,7 @@ public class HungarianTwoAlgorithm {
             colCover[col] = COVERED;
             masks[row][col] = COVERED;
             match = findMatch(row+1);
-            if(match) {
+            if(match && matchMasks.size() >= 10) {
                 return true;
             }
             rowCover[row] = UNCOVERED;
@@ -640,6 +655,15 @@ public class HungarianTwoAlgorithm {
         }
         return match;
 
+    }
+
+    private void addMatchMasks(){
+        List<List<Integer>> currentMasks = new ArrayList<>();
+        for(int r = 0; r < nRow; r++) {
+            List<Integer> row = Arrays.stream(masks[r]).boxed().collect(Collectors.toList()) ;
+            currentMasks.add(row);
+        }
+        matchMasks.add(currentMasks);
     }
 
 
