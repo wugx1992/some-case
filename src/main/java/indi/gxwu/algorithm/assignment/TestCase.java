@@ -52,9 +52,9 @@ public class TestCase {
      */
     @Test
     public void verifyCorrectnessLoopTest () {
-        int row = 8;
-        int col = 8;
-        int loopTimes = 5000;
+        int row = 9;
+        int col = 9;
+        int loopTimes = 10;
         for(int t = 0; t < loopTimes; t++) {
             System.out.println("\n============================  "+(t+1)+"  ===============================");
             int[][] weights = generateMatrix(row, col);
